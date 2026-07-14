@@ -6,6 +6,8 @@
 
 ## 安装
 
+先确认终端中运行 `git --version` 能正常显示版本。Codex 从 GitHub 添加插件市场时会调用 Git；如果看到 `program not found`，请先安装 [Git for Windows](https://git-scm.com/download/win)，然后重新打开终端和 Codex。
+
 在终端中依次运行：
 
 ```powershell
