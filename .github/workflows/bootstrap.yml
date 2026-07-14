@@ -1,0 +1,80 @@
+name: Publish Codex Usage Pet
+
+on:
+  push:
+    paths:
+      - '.github/workflows/bootstrap.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Verify and publish plugin
+        shell: pwsh
+        env:
+          ARCHIVE_SHA256: FAA8756BBA153EAC52A33D59540EC9E2CCB89CCF1F305A880297B993E5A044BD
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $partFiles = Get-ChildItem -LiteralPath '.bootstrap' -Filter 'part-*.txt' -File | Sort-Object Name
+          if ($partFiles.Count -ne 8) {
+            throw "Expected 8 payload parts, found $($partFiles.Count)."
+          }
+
+          $base64 = ($partFiles | ForEach-Object {
+            Get-Content -Raw -LiteralPath $_.FullName
+          }) -join ''
+          $base64 = $base64 -replace '\s', ''
+
+          $zipPath = Join-Path $env:RUNNER_TEMP 'codex-usage-pet.zip'
+          [IO.File]::WriteAllBytes($zipPath, [Convert]::FromBase64String($base64))
+
+          $zipInfo = Get-Item -LiteralPath $zipPath
+          if ($zipInfo.Length -ne 2685764) {
+            throw "Unexpected archive size: $($zipInfo.Length)."
+          }
+
+          $actualHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $zipPath).Hash
+          if ($actualHash -ne $env:ARCHIVE_SHA256) {
+            throw "Archive SHA-256 mismatch: $actualHash."
+          }
+
+          $extractPath = Join-Path $env:RUNNER_TEMP 'codex-usage-pet'
+          New-Item -ItemType Directory -Path $extractPath -Force | Out-Null
+          Expand-Archive -LiteralPath $zipPath -DestinationPath $extractPath -Force
+
+          $requiredFiles = @(
+            '.codex-plugin\plugin.json',
+            '.agents\plugins\marketplace.json',
+            'bin\CodexUsagePet.exe'
+          )
+          foreach ($requiredFile in $requiredFiles) {
+            if (-not (Test-Path -LiteralPath (Join-Path $extractPath $requiredFile))) {
+              throw "Required file missing: $requiredFile."
+            }
+          }
+
+          $fileCount = (Get-ChildItem -LiteralPath $extractPath -File -Recurse).Count
+          if ($fileCount -ne 23) {
+            throw "Expected 23 plugin files, found $fileCount."
+          }
+
+          Get-ChildItem -LiteralPath $extractPath -Force | ForEach-Object {
+            Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $PWD $_.Name) -Recurse -Force
+          }
+          Remove-Item -LiteralPath '.bootstrap' -Recurse -Force
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Publish Codex Usage Pet'
+          git push origin HEAD:main
