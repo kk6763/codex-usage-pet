@@ -1,0 +1,7 @@
+interface:
+  display_name: "Codex Usage Pet"
+  short_description: "See remaining Codex allowance in a tiny desktop pet"
+  icon_small: "./assets/icon.png"
+  icon_large: "./assets/icon.png"
+  brand_color: "#39D98A"
+  default_prompt: "Use $codex-usage-pet to show my remaining Codex allowance or configure the pet to open with Codex."

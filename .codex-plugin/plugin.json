@@ -1,0 +1,38 @@
+{
+  "name": "codex-usage-pet",
+  "version": "0.1.0+codex.20260714151605",
+  "description": "A tiny Windows desktop pet that shows your remaining Codex allowance.",
+  "author": {
+    "name": "Local developer"
+  },
+  "keywords": [
+    "codex",
+    "usage",
+    "rate-limits",
+    "desktop-pet",
+    "windows"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex Usage Pet",
+    "shortDescription": "Remaining Codex allowance in a tiny desktop pet",
+    "longDescription": "Launch a small always-on-top Tail Meter pet whose badge and seven tail dots show the remaining percentage in your current 5-hour Codex window. Click it for 5-hour and weekly remaining allowance, reset countdowns, and secondary token activity. It can open with Codex and restores its last position and size.",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read"
+    ],
+    "defaultPrompt": [
+      "Show my remaining Codex allowance.",
+      "Make my Codex usage pet open automatically with Codex.",
+      "Refresh my remaining Codex allowance.",
+      "Close my Codex usage pet."
+    ],
+    "brandColor": "#39D98A",
+    "logo": "./assets/mascot-source.png",
+    "screenshots": [
+      "./assets/screenshot-tail-meter.png"
+    ]
+  }
+}
